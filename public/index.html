@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ryohei Nagasawa — Software Engineer</title>
+  <link rel="icon" type="image/png" href="/avatar.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ─── DARK THEME (default) ─── */
+    :root {
+      --bg: #050a12;
+      --surface: #0c1522;
+      --surface2: #121e2f;
+      --border: rgba(99,179,237,0.12);
+      --accent: #63b3ed;
+      --accent2: #90cdf4;
+      --accent3: #4299e1;
+      --text: #e2e8f0;
+      --muted: #718096;
+      --heading: #f7fafc;
+      --glow: rgba(99,179,237,0.15);
+      --nav-scrolled: rgba(5,10,18,0.88);
+      --card-hover-shadow: rgba(0,0,0,0.4);
+    }
+
+    /* ─── LIGHT THEME ─── */
+    [data-theme="light"] {
+      --bg: #a8c4de;
+      --surface: #c2d8ec;
+      --surface2: #b4ccdf;
+      --border: rgba(44,82,130,0.25);
+      --accent: #1a4f7a;
+      --accent2: #1e3a5f;
+      --accent3: #2563a8;
+      --text: #0f2337;
+      --muted: #2d4f6e;
+      --heading: #080f1a;
+      --glow: rgba(37,99,168,0.15);
+      --nav-scrolled: rgba(140,175,205,0.94);
+      --card-hover-shadow: rgba(10,30,60,0.2);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ─── CANVAS ─── */
+    #hero-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.3s;
+    }
+    [data-theme="light"] #hero-canvas { opacity: 0.6; }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 4rem;
+      background: transparent;
+      backdrop-filter: blur(0px);
+      transition: background 0.4s, backdrop-filter 0.4s, border-color 0.3s;
+    }
+    nav.scrolled {
+      background: var(--nav-scrolled);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+      font-weight: 500;
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .ctrl-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 0.35rem 0.7rem;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      transition: all 0.2s;
+      letter-spacing: 0.05em;
+    }
+    .ctrl-btn:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(99,179,237,0.06);
+    }
+    .theme-btn { font-size: 1rem; padding: 0.3rem 0.55rem; }
+
+    /* ─── HERO ─── */
+    #hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0 10vw;
+    }
+    .hero-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.3s forwards;
+    }
+    .hero-name {
+      font-size: clamp(3rem, 8vw, 7rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--heading);
+      margin-bottom: 0.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.5s forwards;
+    }
+    .hero-name span { color: var(--accent); }
+    .hero-subtitle {
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      font-weight: 300;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.7s forwards;
+    }
+    .hero-desc {
+      max-width: 540px;
+      font-size: 1.05rem;
+      color: var(--text);
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.9s forwards;
+      margin-bottom: 3rem;
+    }
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 1.1s forwards;
+    }
+    .btn {
+      padding: 0.85rem 2rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: all 0.25s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--accent3);
+      color: #fff;
+      box-shadow: 0 0 30px rgba(99,179,237,0.3);
+    }
+    .btn-primary:hover {
+      background: var(--accent2);
+      box-shadow: 0 0 50px rgba(99,179,237,0.5);
+      transform: translateY(-2px);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+    .btn-ghost:hover {
+      background: rgba(99,179,237,0.08);
+      transform: translateY(-2px);
+    }
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      opacity: 0;
+      animation: fadeIn 1s ease 1.5s forwards;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    /* ─── SECTIONS ─── */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 7rem 10vw;
+    }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--heading);
+      margin-bottom: 1rem;
+    }
+    .section-divider {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(to right, var(--accent3), var(--accent));
+      border-radius: 2px;
+      margin-bottom: 4rem;
+    }
+
+    /* ─── ABOUT ─── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: start;
+    }
+    .about-text p {
+      color: var(--text);
+      margin-bottom: 1.25rem;
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+    .about-text strong { color: var(--accent); }
+    .info-list {
+      list-style: none;
+      margin-top: 2rem;
+    }
+    .info-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .info-list li span:first-child {
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      min-width: 100px;
+    }
+    .info-list a { color: var(--accent); text-decoration: none; }
+    .info-list a:hover { text-decoration: underline; }
+
+    /* ─── AVATAR ─── */
+    .avatar-wrapper {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 2.5rem;
+    }
+    .avatar-ring {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent3), var(--accent2), var(--accent3));
+      animation: spinRing 6s linear infinite;
+      z-index: 0;
+    }
+    .avatar-ring-mask {
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      background: var(--bg);
+      z-index: 1;
+      transition: background 0.3s;
+    }
+    .avatar-img {
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      object-fit: cover;
+      width: calc(100% - 6px);
+      height: calc(100% - 6px);
+      z-index: 2;
+    }
+    @keyframes spinRing {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    .skills-section { margin-top: 0; }
+    .skills-section h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--heading);
+      margin-bottom: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+    .skill-tag {
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .skill-tag:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99,179,237,0.06);
+      transform: translateY(-2px);
+    }
+    .skill-tag.highlight {
+      border-color: rgba(99,179,237,0.4);
+      color: var(--accent2);
+      background: rgba(99,179,237,0.08);
+    }
+
+    /* ─── STATS ─── */
+    .stats-row { display: flex; gap: 3rem; flex-wrap: wrap; margin-top: 3rem; }
+    .stat-num {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--heading);
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+    .stat-num span { color: var(--accent); }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ─── BADGE ─── */
+    .badge-3d {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      border-radius: 100px;
+      background: rgba(99,179,237,0.08);
+      border: 1px solid rgba(99,179,237,0.25);
+      color: var(--accent2);
+      font-size: 0.82rem;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 2rem;
+    }
+    .badge-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #48bb78;
+      box-shadow: 0 0 8px #48bb78;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    /* ─── TIMELINE ─── */
+    .timeline { position: relative; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--accent3), transparent);
+    }
+    .timeline-item {
+      padding-left: 2.5rem;
+      margin-bottom: 3.5rem;
+      position: relative;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -5px; top: 6px;
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: var(--accent3);
+      box-shadow: 0 0 12px rgba(99,179,237,0.5);
+    }
+    .timeline-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    .timeline-company {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--heading);
+      margin-bottom: 0.25rem;
+    }
+    .timeline-role {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+    .timeline-body { display: flex; flex-direction: column; gap: 0.75rem; }
+    .timeline-point {
+      display: flex;
+      gap: 0.75rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+    .timeline-point::before {
+      content: '▹';
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .tech-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.25rem; }
+    .tech-chip {
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(66,153,225,0.1);
+      color: var(--accent2);
+      border: 1px solid rgba(99,179,237,0.2);
+    }
+
+    /* ─── PROJECTS ─── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 2rem;
+    }
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(to right, var(--accent3), var(--accent));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .project-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(99,179,237,0.3);
+      box-shadow: 0 20px 60px var(--card-hover-shadow), 0 0 40px var(--glow);
+    }
+    .project-card:hover::before { opacity: 1; }
+    .project-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(66,153,225,0.2), rgba(99,179,237,0.1));
+      border: 1px solid rgba(99,179,237,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      font-size: 1.4rem;
+    }
+    .project-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--heading);
+      margin-bottom: 0.35rem;
+    }
+    .project-type {
+      font-size: 0.78rem;
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+    }
+    .project-desc {
+      color: var(--text);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ─── EDUCATION ─── */
+    .education-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      max-width: 700px;
+      transition: all 0.3s;
+    }
+    .education-card:hover {
+      border-color: rgba(99,179,237,0.3);
+      box-shadow: 0 10px 40px var(--card-hover-shadow);
+    }
+    .edu-degree {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--heading);
+      margin-bottom: 0.25rem;
+    }
+    .edu-school { font-size: 1rem; color: var(--accent2); margin-bottom: 0.25rem; }
+    .edu-period {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+    .edu-awards { display: flex; flex-direction: column; gap: 0.6rem; }
+    .edu-award {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      background: rgba(99,179,237,0.06);
+      border: 1px solid rgba(99,179,237,0.15);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: var(--text);
+    }
+    .edu-award-icon { font-size: 1rem; flex-shrink: 0; padding-top: 2px; }
+    .edu-award-title {
+      font-weight: 600;
+      color: var(--heading);
+      margin-bottom: 0.2rem;
+    }
+    .edu-award-title small { font-size: 0.78rem; color: var(--muted); font-weight: 400; }
+    .edu-award-sub { font-size: 0.82rem; color: var(--muted); }
+
+    /* ─── CONTACT ─── */
+    #contact { text-align: center; padding-bottom: 5rem; }
+    .contact-inner { max-width: 600px; margin: 0 auto; }
+    .contact-headline {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      color: var(--heading);
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+    }
+    .contact-headline span { color: var(--accent); }
+    .contact-text { color: var(--muted); margin-bottom: 3rem; font-size: 1.05rem; }
+    .contact-links {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 1.5rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.25s;
+    }
+    .contact-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99,179,237,0.06);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(99,179,237,0.15);
+    }
+    .contact-link svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
+    .contact-link svg.stroke-icon { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ─── SCROLL REVEAL ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 0.8; }
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ─── MOBILE ─── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      #hero, section { padding-left: 6vw; padding-right: 6vw; }
+      .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .stats-row { gap: 1.5rem; }
+      .nav-right { gap: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="hero-canvas"></canvas>
+
+  <!-- Navigation -->
+  <nav id="nav">
+    <div class="nav-logo">RN.dev</div>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="#about"      data-i18n="nav_about">About</a></li>
+        <li><a href="#experience" data-i18n="nav_exp">Experience</a></li>
+        <li><a href="#projects"   data-i18n="nav_proj">Projects</a></li>
+        <li><a href="#education"  data-i18n="nav_edu">Education</a></li>
+        <li><a href="#contact"    data-i18n="nav_contact">Contact</a></li>
+      </ul>
+      <div class="nav-controls">
+        <button class="ctrl-btn" id="lang-btn" onclick="toggleLang()">日本語</button>
+        <button class="ctrl-btn theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section id="hero">
+    <div class="hero-tag" data-i18n="hero_tag">Software Engineer · Japan</div>
+    <h1 class="hero-name">Ryohei<br /><span>Nagasawa</span></h1>
+    <p class="hero-subtitle" data-i18n="hero_sub">Building AI-Powered Systems</p>
+    <p class="hero-desc" data-i18n="hero_desc">
+      Crafting scalable infrastructure for enterprise AI at RAKSUL —
+      from search pipelines to agentic systems powered by Vertex AI and Gemini.
+    </p>
+    <div class="hero-cta">
+      <a href="#contact" class="btn btn-primary" data-i18n="hero_cta1">Get in Touch</a>
+      <a href="#experience" class="btn btn-ghost" data-i18n="hero_cta2">View Work</a>
+      <a href="/resume.pdf" download class="btn btn-ghost" data-i18n="hero_cta3">↓ Resume</a>
+    </div>
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      <span data-i18n="scroll_label">SCROLL</span>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about">
+    <div class="section-label" data-i18n="about_label">01 / About</div>
+    <h2 class="section-title reveal" data-i18n="about_title">Who I Am</h2>
+    <div class="section-divider reveal reveal-delay-1"></div>
+    <div class="about-grid">
+      <div class="about-text reveal reveal-delay-2">
+        <div class="badge-3d">
+          <span class="badge-dot"></span>
+          <span data-i18n="about_badge">Available for opportunities</span>
+        </div>
+        <p data-i18n="about_p1">
+          I'm a Software Engineer based in <strong>Japan</strong> with deep expertise in building scalable AI infrastructure and enterprise systems. Currently at <strong>RAKSUL</strong>, I lead the design and implementation of search and agent systems powered by Vertex AI and Gemini.
+        </p>
+        <p data-i18n="about_p2">
+          I own system architecture, technical roadmaps, and cross-team alignment — turning ambitious multi-quarter AI projects into shipped products. My work touches everything from low-level infrastructure to product-level strategy.
+        </p>
+        <p data-i18n="about_p3">
+          Outside of work, I founded <strong>InterviewGPT</strong> — an AI-powered platform for technical interview preparation — where I handle everything from architecture to implementation solo.
+        </p>
+        <ul class="info-list">
+          <li><span data-i18n="info_loc_label">Location</span> <span data-i18n="info_loc_val">Tokyo, Japan 🇯🇵</span></li>
+          <li><span>LinkedIn</span> <a href="https://www.linkedin.com/in/ryoheinan" target="_blank">linkedin.com/in/ryoheinan</a></li>
+          <li><span>GitHub</span> <a href="https://github.com/ryoheinan" target="_blank">github.com/ryoheinan</a></li>
+          <li><span data-i18n="info_site_label">Website</span> <a href="https://ryohei.dev" target="_blank">ryohei.dev</a></li>
+          <li><span data-i18n="info_lang_label">Languages</span> <span data-i18n="info_lang_val">Japanese (Native) · English</span></li>
+        </ul>
+        <div class="stats-row">
+          <div class="stat-block">
+            <div class="stat-num">3<span>+</span></div>
+            <div class="stat-label" data-i18n="stat1">years experience</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-num">1<span>+</span></div>
+            <div class="stat-label" data-i18n="stat2">AI products shipped</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-num">∞</div>
+            <div class="stat-label" data-i18n="stat3">lines of TypeScript</div>
+          </div>
+        </div>
+      </div>
+      <div class="skills-section reveal reveal-delay-3">
+        <div class="avatar-wrapper">
+          <div class="avatar-ring"></div>
+          <div class="avatar-ring-mask"></div>
+          <img class="avatar-img" src="/avatar.png" alt="Ryohei Nagasawa" />
+        </div>
+        <h3 data-i18n="skills_title">// Core Skills</h3>
+        <div class="skill-tags">
+          <span class="skill-tag highlight">React.js</span>
+          <span class="skill-tag highlight">Next.js</span>
+          <span class="skill-tag highlight">TypeScript</span>
+          <span class="skill-tag highlight">Vertex AI</span>
+          <span class="skill-tag highlight">Gemini API</span>
+          <span class="skill-tag">Node.js</span>
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag" data-i18n="skill_arch">System Architecture</span>
+          <span class="skill-tag" data-i18n="skill_agents">AI Agents</span>
+          <span class="skill-tag" data-i18n="skill_search">Search Infrastructure</span>
+          <span class="skill-tag" data-i18n="skill_roadmap">Technical Roadmap</span>
+          <span class="skill-tag" data-i18n="skill_xteam">Cross-team Alignment</span>
+          <span class="skill-tag" data-i18n="skill_fullstack">Full-Stack Engineering</span>
+          <span class="skill-tag" data-i18n="skill_product">Product Design</span>
+        </div>
+        <div style="margin-top: 2.5rem;">
+          <h3 data-i18n="cert_title">// Certifications</h3>
+          <div class="skill-tags" style="margin-top:1rem;">
+            <span class="skill-tag highlight">基本情報技術者試験</span>
+            <span class="skill-tag" style="font-size:0.78rem;" data-i18n="cert_sub">Fundamental IT Engineer (Japan)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience -->
+  <section id="experience">
+    <div class="section-label" data-i18n="exp_label">02 / Experience</div>
+    <h2 class="section-title reveal" data-i18n="exp_title">Where I've Worked</h2>
+    <div class="section-divider reveal reveal-delay-1"></div>
+    <div class="timeline">
+      <div class="timeline-item reveal reveal-delay-2">
+        <div class="timeline-meta" data-i18n="exp_meta">Apr 2023 — Present · 2+ Years</div>
+        <div class="timeline-company">RAKSUL Inc.</div>
+        <div class="timeline-role" data-i18n="exp_role">Software Engineer · Full-Time</div>
+        <div class="timeline-body">
+          <div class="timeline-point" data-i18n="exp_p1">
+            Designed and implemented a scalable search and agent infrastructure for Vertex AI and Gemini Enterprise capabilities, including search spaces and autonomous agent orchestration.
+          </div>
+          <div class="timeline-point" data-i18n="exp_p2">
+            Fostered cross-organizational collaboration across product managers, UX designers, and engineering teams to deliver cohesive enterprise-grade AI solutions.
+          </div>
+          <div class="timeline-point" data-i18n="exp_p3">
+            Owned system architecture, technical roadmap, engineering execution, and launch readiness for multi-quarter AI projects — ensuring timely delivery without compromising quality.
+          </div>
+          <div class="timeline-point" data-i18n="exp_p4">
+            Led cross-team alignment initiatives, acting as the technical bridge between business stakeholders and engineering to define and execute on ambitious AI product goals.
+          </div>
+        </div>
+        <div class="tech-chips">
+          <span class="tech-chip">Vertex AI</span>
+          <span class="tech-chip">Gemini</span>
+          <span class="tech-chip">React.js</span>
+          <span class="tech-chip">Next.js</span>
+          <span class="tech-chip">TypeScript</span>
+          <span class="tech-chip">AI Agents</span>
+          <span class="tech-chip" data-i18n="chip_search">Search Infrastructure</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects">
+    <div class="section-label" data-i18n="proj_label">03 / Projects</div>
+    <h2 class="section-title reveal" data-i18n="proj_title">Things I've Built</h2>
+    <div class="section-divider reveal reveal-delay-1"></div>
+    <div class="projects-grid">
+      <div class="project-card reveal reveal-delay-2">
+        <div class="project-icon">🤖</div>
+        <div class="project-name">InterviewGPT</div>
+        <div class="project-type" data-i18n="proj1_type">FOUNDER &amp; LEAD ENGINEER · SIDE PROJECT</div>
+        <p class="project-desc" data-i18n="proj1_desc">
+          An AI-powered technical interview preparation platform. Built as sole developer — responsible for product design, system architecture, and full-stack implementation from day one.
+        </p>
+        <div class="tech-chips" style="margin-bottom: 1.5rem;">
+          <span class="tech-chip">AI / LLM</span>
+          <span class="tech-chip">Next.js</span>
+          <span class="tech-chip">TypeScript</span>
+          <span class="tech-chip">Full-Stack</span>
+        </div>
+        <div style="color:var(--muted);font-size:0.85rem;" data-i18n="proj1_note">⚡ Built solo end-to-end</div>
+      </div>
+      <div class="project-card reveal reveal-delay-3">
+        <div class="project-icon">🔍</div>
+        <div class="project-name" data-i18n="proj2_name">AI Search &amp; Agent Platform</div>
+        <div class="project-type" data-i18n="proj2_type">RAKSUL · ENTERPRISE INFRASTRUCTURE</div>
+        <p class="project-desc" data-i18n="proj2_desc">
+          Scalable search and agent infrastructure for Vertex AI and Gemini Enterprise. Handles large-scale document retrieval, agentic task orchestration, and cross-team delivery for enterprise clients.
+        </p>
+        <div class="tech-chips" style="margin-bottom: 1.5rem;">
+          <span class="tech-chip">Vertex AI</span>
+          <span class="tech-chip">Gemini</span>
+          <span class="tech-chip">Agent Spaces</span>
+          <span class="tech-chip">React.js</span>
+        </div>
+        <div style="color:var(--muted);font-size:0.85rem;" data-i18n="proj2_note">🏢 Enterprise / Confidential</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Education -->
+  <section id="education">
+    <div class="section-label" data-i18n="edu_label">04 / Education</div>
+    <h2 class="section-title reveal" data-i18n="edu_title">Background</h2>
+    <div class="section-divider reveal reveal-delay-1"></div>
+    <div class="education-card reveal reveal-delay-2">
+      <div class="edu-degree" data-i18n="edu_degree">Bachelor of Information Science</div>
+      <div class="edu-school">東洋大学 · Toyo University — INIAD (情報連携学部)</div>
+      <div class="edu-period" data-i18n="edu_period">April 2019 — March 2023</div>
+      <div class="edu-awards">
+        <div class="edu-award">
+          <span class="edu-award-icon">🥈</span>
+          <div>
+            <div class="edu-award-title">
+              <span data-i18n="award1_name">INIAD Silver Thesis Award</span>
+              <small> · Mar 2023</small>
+            </div>
+            <div class="edu-award-sub">"Gitdox: Git Version Control System for OOXML Documents"</div>
+          </div>
+        </div>
+        <div class="edu-award">
+          <span class="edu-award-icon">📜</span>
+          <div>
+            <div class="edu-award-title">
+              基本情報技術者試験 <small> · Dec 2021</small>
+            </div>
+            <div class="edu-award-sub" data-i18n="cert_desc">Fundamental IT Engineer Examination · Issued by 経済産業省</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact">
+    <div class="contact-inner">
+      <div class="section-label" style="text-align:center; margin-bottom:1.5rem;" data-i18n="contact_label">05 / Contact</div>
+      <h2 class="contact-headline reveal" data-i18n="contact_headline">Let's <span>Build</span><br>Something Together</h2>
+      <p class="contact-text reveal reveal-delay-1" data-i18n="contact_text">
+        Open to interesting projects, collaborations, and conversations about AI infrastructure, system architecture, or full-stack engineering.
+      </p>
+      <div class="contact-links reveal reveal-delay-2">
+        <a href="https://www.linkedin.com/in/ryoheinan" target="_blank" class="contact-link">
+          <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          LinkedIn
+        </a>
+        <a href="https://github.com/ryoheinan" target="_blank" class="contact-link">
+          <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          GitHub
+        </a>
+        <a href="https://ryohei.dev" target="_blank" class="contact-link">
+          <svg viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 6.628 5.374 12 12 12 6.628 0 12-5.372 12-12 0-6.627-5.372-12-12-12zm0 2c5.523 0 10 4.478 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 3c-3.866 0-7 3.134-7 7 0 3.867 3.134 7 7 7 3.867 0 7-3.133 7-7 0-3.866-3.133-7-7-7z"/></svg>
+          ryohei.dev
+        </a>
+        <a href="/resume.pdf" download class="contact-link">
+          <svg class="stroke-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span data-i18n="dl_cv">Download CV</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span data-i18n="footer_text">Built by Ryohei Nagasawa · 2024 · </span>
+    <span style="color:var(--accent);">Three.js + Vanilla JS</span>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script>
+  // ─── TRANSLATIONS ────────────────────────────────────────────────────────────
+  const T = {
+    en: {
+      nav_about: 'About', nav_exp: 'Experience', nav_proj: 'Projects',
+      nav_edu: 'Education', nav_contact: 'Contact',
+      hero_tag: 'Software Engineer · Japan',
+      hero_sub: 'Building AI-Powered Systems',
+      hero_desc: 'Crafting scalable infrastructure for enterprise AI at RAKSUL — from search pipelines to agentic systems powered by Vertex AI and Gemini.',
+      hero_cta1: 'Get in Touch', hero_cta2: 'View Work', hero_cta3: '↓ Resume',
+      scroll_label: 'SCROLL',
+      about_label: '01 / About', about_title: 'Who I Am',
+      about_badge: 'Available for opportunities',
+      about_p1: 'I\'m a Software Engineer based in <strong>Japan</strong> with deep expertise in building scalable AI infrastructure and enterprise systems. Currently at <strong>RAKSUL</strong>, I lead the design and implementation of search and agent systems powered by Vertex AI and Gemini.',
+      about_p2: 'I own system architecture, technical roadmaps, and cross-team alignment — turning ambitious multi-quarter AI projects into shipped products. My work touches everything from low-level infrastructure to product-level strategy.',
+      about_p3: 'Outside of work, I founded <strong>InterviewGPT</strong> — an AI-powered platform for technical interview preparation — where I handle everything from architecture to implementation solo.',
+      info_loc_label: 'Location', info_loc_val: 'Tokyo, Japan 🇯🇵',
+      info_site_label: 'Website', info_lang_label: 'Languages',
+      info_lang_val: 'Japanese (Native) · English',
+      stat1: 'years experience', stat2: 'AI products shipped', stat3: 'lines of TypeScript',
+      skills_title: '// Core Skills', cert_title: '// Certifications',
+      skill_arch: 'System Architecture', skill_agents: 'AI Agents',
+      skill_search: 'Search Infrastructure', skill_roadmap: 'Technical Roadmap',
+      skill_xteam: 'Cross-team Alignment', skill_fullstack: 'Full-Stack Engineering',
+      skill_product: 'Product Design', cert_sub: 'Fundamental IT Engineer (Japan)',
+      exp_label: '02 / Experience', exp_title: "Where I've Worked",
+      exp_meta: 'Apr 2023 — Present · 2+ Years',
+      exp_role: 'Software Engineer · Full-Time',
+      exp_p1: 'Designed and implemented a scalable search and agent infrastructure for Vertex AI and Gemini Enterprise capabilities, including search spaces and autonomous agent orchestration.',
+      exp_p2: 'Fostered cross-organizational collaboration across product managers, UX designers, and engineering teams to deliver cohesive enterprise-grade AI solutions.',
+      exp_p3: 'Owned system architecture, technical roadmap, engineering execution, and launch readiness for multi-quarter AI projects — ensuring timely delivery without compromising quality.',
+      exp_p4: 'Led cross-team alignment initiatives, acting as the technical bridge between business stakeholders and engineering to define and execute on ambitious AI product goals.',
+      chip_search: 'Search Infrastructure',
+      proj_label: '03 / Projects', proj_title: "Things I've Built",
+      proj1_type: 'FOUNDER & LEAD ENGINEER · SIDE PROJECT',
+      proj1_desc: 'An AI-powered technical interview preparation platform. Built as sole developer — responsible for product design, system architecture, and full-stack implementation from day one.',
+      proj1_note: '⚡ Built solo end-to-end',
+      proj2_name: 'AI Search & Agent Platform',
+      proj2_type: 'RAKSUL · ENTERPRISE INFRASTRUCTURE',
+      proj2_desc: 'Scalable search and agent infrastructure for Vertex AI and Gemini Enterprise. Handles large-scale document retrieval, agentic task orchestration, and cross-team delivery for enterprise clients.',
+      proj2_note: '🏢 Enterprise / Confidential',
+      edu_label: '04 / Education', edu_title: 'Background',
+      edu_degree: 'Bachelor of Information Science',
+      edu_period: 'April 2019 — March 2023',
+      award1_name: 'INIAD Silver Thesis Award',
+      cert_desc: 'Fundamental IT Engineer Examination · Issued by 経済産業省',
+      contact_label: '05 / Contact',
+      contact_headline: "Let's <span>Build</span><br>Something Together",
+      contact_text: 'Open to interesting projects, collaborations, and conversations about AI infrastructure, system architecture, or full-stack engineering.',
+      dl_cv: 'Download CV',
+      footer_text: 'Built by Ryohei Nagasawa · 2024 · ',
+    },
+    ja: {
+      nav_about: '自己紹介', nav_exp: '経歴', nav_proj: 'プロジェクト',
+      nav_edu: '学歴', nav_contact: 'お問い合わせ',
+      hero_tag: 'ソフトウェアエンジニア · 日本',
+      hero_sub: 'AIシステムを構築する',
+      hero_desc: 'RAKSULにてエンタープライズAIのスケーラブルなインフラを構築 — Vertex AIとGeminiを活用した検索パイプラインからエージェントシステムまで。',
+      hero_cta1: 'お問い合わせ', hero_cta2: '実績を見る', hero_cta3: '↓ 職務経歴書',
+      scroll_label: 'スクロール',
+      about_label: '01 / 自己紹介', about_title: '私について',
+      about_badge: '新しい機会を探しています',
+      about_p1: '私は<strong>日本</strong>を拠点とするソフトウェアエンジニアで、スケーラブルなAIインフラとエンタープライズシステムの構築に深い専門知識を持っています。現在は<strong>RAKSUL</strong>にて、Vertex AIとGeminiを活用した検索・エージェントシステムの設計・実装をリードしています。',
+      about_p2: 'システムアーキテクチャ、技術ロードマップ、クロスチームの連携を主導し、野心的なマルチクォータープロジェクトを製品としてリリースしてきました。低レベルのインフラから製品戦略まで幅広く携わっています。',
+      about_p3: '業務外では、AIを活用した技術面接対策プラットフォーム<strong>InterviewGPT</strong>を創設し、アーキテクチャから実装まですべてを一人でこなしています。',
+      info_loc_label: '所在地', info_loc_val: '東京、日本 🇯🇵',
+      info_site_label: 'ウェブサイト', info_lang_label: '言語',
+      info_lang_val: '日本語（母国語）· 英語',
+      stat1: '年の経験', stat2: 'AIプロダクト', stat3: '行のTypeScript',
+      skills_title: '// コアスキル', cert_title: '// 資格',
+      skill_arch: 'システムアーキテクチャ', skill_agents: 'AIエージェント',
+      skill_search: '検索インフラ', skill_roadmap: '技術ロードマップ',
+      skill_xteam: 'クロスチーム連携', skill_fullstack: 'フルスタック開発',
+      skill_product: 'プロダクトデザイン', cert_sub: '基本情報技術者（日本）',
+      exp_label: '02 / 経歴', exp_title: '職務経歴',
+      exp_meta: '2023年4月 — 現在 · 2年以上',
+      exp_role: 'ソフトウェアエンジニア · 正社員',
+      exp_p1: 'Vertex AIおよびGemini Enterpriseの機能（検索スペースや自律エージェントオーケストレーションを含む）に対応したスケーラブルな検索・エージェントインフラを設計・実装しました。',
+      exp_p2: 'プロダクトマネージャー、UXデザイナー、エンジニアリングチームにまたがる組織横断的なコラボレーションを推進し、エンタープライズグレードのAIソリューションを一貫して提供しました。',
+      exp_p3: 'マルチクォーターのAIプロジェクトにおいて、システムアーキテクチャ、技術ロードマップ、エンジニアリング実行、リリース準備を担当し、品質を妥協せず期限内の納品を実現しました。',
+      exp_p4: 'クロスチーム連携イニシアチブをリードし、ビジネスステークホルダーとエンジニアリングをつなぐ技術的な橋渡し役として、野心的なAI製品目標の定義と実行を推進しました。',
+      chip_search: '検索インフラ',
+      proj_label: '03 / プロジェクト', proj_title: '制作物',
+      proj1_type: '創設者 & リードエンジニア · サイドプロジェクト',
+      proj1_desc: 'AIを活用した技術面接対策プラットフォーム。ソロ開発者として、プロダクトデザイン、システムアーキテクチャ、フルスタック実装をすべて担当しました。',
+      proj1_note: '⚡ 一人でゼロから開発',
+      proj2_name: 'AI検索・エージェントプラットフォーム',
+      proj2_type: 'RAKSUL · エンタープライズインフラ',
+      proj2_desc: 'Vertex AIおよびGemini Enterprise向けのスケーラブルな検索・エージェントインフラ。大規模ドキュメント検索、エージェンティックタスクオーケストレーション、クロスチームでのエンタープライズ向け提供を実現しています。',
+      proj2_note: '🏢 エンタープライズ / 非公開',
+      edu_label: '04 / 学歴', edu_title: '学歴・資格',
+      edu_degree: '情報科学学士',
+      edu_period: '2019年4月 — 2023年3月',
+      award1_name: 'INIAD 卒業論文銀賞',
+      cert_desc: '基本情報技術者試験 · 経済産業省 発行',
+      contact_label: '05 / お問い合わせ',
+      contact_headline: '一緒に何か<span>作り</span>ましょう',
+      contact_text: 'AIインフラ、システムアーキテクチャ、またはフルスタックエンジニアリングに関する興味深いプロジェクト、コラボレーション、会話を歓迎します。',
+      dl_cv: 'CVをダウンロード',
+      footer_text: 'Ryohei Nagasawa 制作 · 2024 · ',
+    }
+  };
+
+  let currentLang = 'en';
+  let currentTheme = 'dark';
+
+  function setLang(lang) {
+    currentLang = lang;
+    const dict = T[lang];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key] !== undefined) el.innerHTML = dict[key];
+    });
+    document.documentElement.lang = lang === 'ja' ? 'ja' : 'en';
+    document.getElementById('lang-btn').textContent = lang === 'en' ? '日本語' : 'English';
+  }
+
+  function toggleLang() {
+    setLang(currentLang === 'en' ? 'ja' : 'en');
+  }
+
+  function setTheme(theme) {
+    currentTheme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('theme-btn').textContent = theme === 'dark' ? '☀️' : '🌙';
+    // Update Three.js particle/line colors
+    if (particleMat) {
+      particleMat.color.set(theme === 'dark' ? 0x63b3ed : 0x3182ce);
+      particleMat.opacity = theme === 'dark' ? 0.7 : 0.9;
+    }
+    if (lineMat) {
+      lineMat.color.set(theme === 'dark' ? 0x4299e1 : 0x3182ce);
+    }
+    shapes.forEach(s => {
+      s.material.opacity = theme === 'dark' ? 0.15 : 0.2;
+    });
+  }
+
+  function toggleTheme() {
+    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  }
+
+  // ─── THREE.JS ─────────────────────────────────────────────────────────────
+  const canvas = document.getElementById('hero-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 80;
+
+  const PARTICLE_COUNT = 180;
+  const positions = new Float32Array(PARTICLE_COUNT * 3);
+  const velocities = [];
+  const particleGeo = new THREE.BufferGeometry();
+  const sizes = new Float32Array(PARTICLE_COUNT);
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    positions[i*3]   = (Math.random() - 0.5) * 200;
+    positions[i*3+1] = (Math.random() - 0.5) * 120;
+    positions[i*3+2] = (Math.random() - 0.5) * 60;
+    velocities.push({
+      x: (Math.random() - 0.5) * 0.05,
+      y: (Math.random() - 0.5) * 0.05,
+      z: (Math.random() - 0.5) * 0.02,
+    });
+    sizes[i] = Math.random() * 1.5 + 0.5;
+  }
+
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  particleGeo.setAttribute('size',     new THREE.BufferAttribute(sizes, 1));
+
+  let particleMat = new THREE.PointsMaterial({
+    color: 0x63b3ed, size: 0.8, sizeAttenuation: true, transparent: true, opacity: 0.7,
+  });
+  scene.add(new THREE.Points(particleGeo, particleMat));
+
+  let lineMat, lineSystem;
+  const MAX_DIST = 35;
+
+  function buildLines() {
+    const pos = [];
+    const arr = particleGeo.attributes.position.array;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      for (let j = i + 1; j < PARTICLE_COUNT; j++) {
+        const dx = arr[i*3]-arr[j*3], dy = arr[i*3+1]-arr[j*3+1], dz = arr[i*3+2]-arr[j*3+2];
+        if (Math.sqrt(dx*dx+dy*dy+dz*dz) < MAX_DIST) {
+          pos.push(arr[i*3],arr[i*3+1],arr[i*3+2], arr[j*3],arr[j*3+1],arr[j*3+2]);
+        }
+      }
+    }
+    if (lineSystem) scene.remove(lineSystem);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    lineMat = new THREE.LineBasicMaterial({ color: 0x4299e1, transparent: true, opacity: 0.25 });
+    lineSystem = new THREE.LineSegments(geo, lineMat);
+    scene.add(lineSystem);
+  }
+  buildLines();
+
+  const shapes = [];
+  const shapeGeos = [
+    new THREE.IcosahedronGeometry(2, 0),
+    new THREE.OctahedronGeometry(2, 0),
+    new THREE.TetrahedronGeometry(2.5, 0),
+  ];
+  for (let i = 0; i < 5; i++) {
+    const mat = new THREE.MeshBasicMaterial({ color: 0x4299e1, wireframe: true, transparent: true, opacity: 0.15 });
+    const mesh = new THREE.Mesh(shapeGeos[i % 3], mat);
+    mesh.position.set((Math.random()-0.5)*150, (Math.random()-0.5)*80, (Math.random()-0.5)*40-20);
+    mesh.userData.rot = { x: (Math.random()-0.5)*0.008, y: (Math.random()-0.5)*0.008 };
+    scene.add(mesh);
+    shapes.push(mesh);
+  }
+
+  let mouseX = 0, mouseY = 0, frame = 0;
+  document.addEventListener('mousemove', e => {
+    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+  });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    frame++;
+    const arr = particleGeo.attributes.position.array;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      arr[i*3]   += velocities[i].x;
+      arr[i*3+1] += velocities[i].y;
+      arr[i*3+2] += velocities[i].z;
+      if (Math.abs(arr[i*3])   > 100) velocities[i].x *= -1;
+      if (Math.abs(arr[i*3+1]) > 60)  velocities[i].y *= -1;
+      if (Math.abs(arr[i*3+2]) > 30)  velocities[i].z *= -1;
+    }
+    particleGeo.attributes.position.needsUpdate = true;
+    if (frame % 6 === 0) buildLines();
+    shapes.forEach(s => { s.rotation.x += s.userData.rot.x; s.rotation.y += s.userData.rot.y; });
+    camera.position.x += (mouseX * 8  - camera.position.x) * 0.04;
+    camera.position.y += (-mouseY * 5 - camera.position.y) * 0.04;
+    camera.lookAt(scene.position);
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // ─── NAV SCROLL ───────────────────────────────────────────────────────────
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60));
+
+  // ─── SCROLL REVEAL ────────────────────────────────────────────────────────
+  const revealObs = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+    { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+  );
+  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+  // ─── SMOOTH SCROLL ────────────────────────────────────────────────────────
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+  </script>
+</body>
+</html>

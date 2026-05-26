@@ -1,0 +1,27 @@
+kind = "design"
+previewPath = "/portfolio"
+title = "Portfolio"
+version = "1.0.0"
+
+[[services]]
+localPort = 3001
+name = "Portfolio"
+paths = ["/portfolio"]
+
+[services.development]
+run = "node server.js"
+
+[services.production]
+
+[services.production.build]
+args = ["echo", "no build step"]
+
+[services.production.run]
+args = ["node", "artifacts/portfolio/server.js"]
+
+[services.production.run.env]
+PORT = "3001"
+NODE_ENV = "production"
+
+[services.production.health.startup]
+path = "/portfolio"
